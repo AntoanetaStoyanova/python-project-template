@@ -3,6 +3,7 @@
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -15,7 +16,18 @@ def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:  # t
     return subprocess.run(cmd, check=check)
 
 
+def is_cruft_update() -> bool:
+    """Vrai si le hook tourne dans un dossier temp — cas d'un cruft update."""
+    return str(Path.cwd()).startswith(tempfile.gettempdir())
+
+
 def main() -> None:
+    # Pendant cruft update, le hook tourne dans un dossier temporaire.
+    # On ne refait pas le setup (git init, uv, GitHub) — on laisse Cruft
+    # appliquer seulement le diff de template.
+    if is_cruft_update():
+        return
+
     # 1. Injecter la date du jour dans CURRENT.md
     current_md = Path(".ai-context/CURRENT.md")
     current_md.write_text(
@@ -61,9 +73,16 @@ def main() -> None:
         result = run(["git", "push", "-u", "origin", "develop"], check=False)
 
         if result.returncode != 0:
-            print("\n[ERREUR] Le push a échoué. Commandes manuelles :")
-            print(f"  git remote set-url origin {remote_url}")
-            print("  git push -u origin develop")
+            print("\n[ERREUR] Le push a échoué.")
+            print("Cause probable : le repo GitHub a été créé avec un README auto-généré.")
+            print("Pour écraser ce contenu et pousser ton projet :")
+            print()
+            print(f"  git push --force-with-lease -u origin develop")
+            print()
+            print("Ou si tu préfères récupérer d'abord le contenu distant :")
+            print()
+            print(f"  git pull origin develop --allow-unrelated-histories")
+            print(f"  git push -u origin develop")
         else:
             print(f"\nSucces ! Le projet '{PROJECT_SLUG}' est disponible sur GitHub.")
             print(f"  {remote_url.replace('.git', '')}")
