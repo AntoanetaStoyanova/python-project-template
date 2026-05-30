@@ -3,6 +3,8 @@
 import shutil
 import subprocess
 import sys
+from datetime import date
+from pathlib import Path
 
 
 PROJECT_SLUG = "{{cookiecutter.project_slug}}"
@@ -14,25 +16,31 @@ def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:  # t
 
 
 def main() -> None:
-    # 1. Initialiser git et créer la branche develop
+    # 1. Injecter la date du jour dans CURRENT.md
+    current_md = Path(".ai-context/CURRENT.md")
+    current_md.write_text(
+        current_md.read_text().replace("__INIT_DATE__", date.today().isoformat())
+    )
+
+    # 2. Initialiser git et créer la branche develop
     run(["git", "init"])
     run(["git", "checkout", "-b", "develop"])
 
-    # 2. Vérifier que uv est installé
+    # 3. Vérifier que uv est installé
     if not shutil.which("uv"):
         print("\n[ERREUR] 'uv' n'est pas installé ou introuvable dans le PATH.")
         print("Installe-le via : https://docs.astral.sh/uv/getting-started/installation/")
         sys.exit(1)
 
-    # 3. Épingler la version Python et synchroniser l'environnement
+    # 4. Épingler la version Python et synchroniser l'environnement
     run(["uv", "python", "pin", PYTHON_VERSION])
     run(["uv", "sync"])
 
-    # 4. Commit initial
+    # 5. Commit initial
     run(["git", "add", "."])
     run(["git", "commit", "-m", "chore: initial project structure from cruft template"])
 
-    # 5. Demander si on pousse sur GitHub
+    # 6. Demander si on pousse sur GitHub
     answer = input("\nVeux-tu pousser le projet sur GitHub ? [o/n] ").strip().lower()
 
     if answer != "o":
@@ -60,7 +68,7 @@ def main() -> None:
             print(f"\nSucces ! Le projet '{PROJECT_SLUG}' est disponible sur GitHub.")
             print(f"  {remote_url.replace('.git', '')}")
 
-    # 6. Récapitulatif final
+    # 7. Récapitulatif final
     branch = subprocess.check_output(
         ["git", "branch", "--show-current"], text=True
     ).strip()
