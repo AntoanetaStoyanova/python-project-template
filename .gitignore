@@ -1,0 +1,5 @@
+.cruft.json
+__pycache__/
+*.py[codz]
+.env
+.venv
