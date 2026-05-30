@@ -61,12 +61,25 @@ def main() -> None:
             print(f"  {remote_url.replace('.git', '')}")
 
     # 6. Récapitulatif final
+    branch = subprocess.check_output(
+        ["git", "branch", "--show-current"], text=True
+    ).strip()
+
     print("\n" + "=" * 60)
-    print(f"Projet '{PROJECT_SLUG}' genere avec succes !")
+    print(f"  Projet '{PROJECT_SLUG}' genere avec succes !")
     print("=" * 60)
-    print(f"  Branche active        : develop")
-    print(f"  Activer l'environnement : source .venv/bin/activate")
-    print(f"  Mettre a jour le template : cruft update")
+    print(f"  Git branch active : {branch}")
+    print()
+    print("  Lance ces commandes pour demarrer :")
+    print()
+    print(f"    cd {PROJECT_SLUG}")
+    print(f"    source .venv/bin/activate")
+    print()
+    print("  Ou en une ligne :")
+    print()
+    print(f"    cd {PROJECT_SLUG} && source .venv/bin/activate")
+    print()
+    print("  Mettre a jour le template plus tard : cruft update")
     print("=" * 60)
 
 
