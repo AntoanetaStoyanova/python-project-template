@@ -65,14 +65,38 @@ mon_projet/
 
 ## Mettre à jour un projet existant
 
-Quand ce template évolue, tous les projets générés peuvent récupérer les changements :
+Quand ce template évolue, tous les projets générés peuvent récupérer les changements.
+
+**Cruft exige un dépôt git propre avant toute mise à jour.** Voici les commandes à exécuter dans l'ordre :
 
 ```bash
 cd mon_projet
+
+# 1. Vérifier l'état du dépôt
+git status
+
+# 2a. Si tu as du travail en cours à garder — commite-le
+git add .
+git commit -m "chore: sauvegarde avant cruft update"
+
+# 2b. Ou si tu veux le mettre de côté temporairement
+git stash
+
+# 3. Lancer la mise à jour
 cruft update
+
+# 4. Si tu as utilisé git stash — récupère ton travail
+git stash pop
+
+# 5. Pousser les changements appliqués sur GitHub
+git add .
+git commit -m "chore: mise à jour depuis le template cruft"
+git push
 ```
 
-Cruft compare le commit du template utilisé à la génération (tracé dans `.cruft.json`) avec le dernier commit sur `main` et propose un diff à appliquer.
+Cruft compare le commit du template utilisé à la génération (tracé dans `.cruft.json`) avec le dernier commit sur `main`, affiche le diff et demande confirmation avant d'appliquer les changements.
+
+> **Si `cruft update` échoue avec `UnicodeDecodeError`** : c'est un conflit de fichiers binaires dans les répertoires temporaires de comparaison. Lance `cruft check` pour vérifier si une mise à jour est nécessaire — si le projet est déjà à jour, il n'y a rien à faire.
 
 ---
 
