@@ -100,6 +100,47 @@ Cruft compare le commit du template utilisé à la génération (tracé dans `.c
 
 ---
 
+## Commandes invoke
+
+Chaque projet généré inclut un dossier `tasks/` avec des commandes d'automatisation exécutables via `inv`.
+
+### Prérequis
+
+`invoke` est inclus dans les dépendances de développement et installé automatiquement par `uv sync`.
+
+### Liste des commandes
+
+| Commande | Description |
+|----------|-------------|
+| `inv lint` | Vérifie le code avec Ruff (lint) |
+| `inv fmt` | Formate le code avec Ruff |
+| `inv typecheck` | Vérifie les types avec mypy |
+| `inv check` | Lint + typecheck en séquence |
+| `inv test` | Lance pytest avec coverage |
+| `inv ci` | Suite complète : lint, typecheck, tests |
+| `inv docs` | Génère la documentation Sphinx dans `docs/_build/html/` |
+| `inv docs-clean` | Supprime la documentation générée |
+| `inv push-develop` | `git push origin develop` |
+| `inv push-main` | `git push origin main` (avec confirmation) |
+
+### Exemples
+
+```bash
+# Vérification qualité avant un commit
+inv check
+
+# Suite complète avant un push
+inv ci
+
+# Générer la doc
+inv docs
+
+# Pousser le travail en cours
+inv push-develop
+```
+
+---
+
 ## Ce qui est configuré dans chaque projet généré
 
 | Outil | Config |
@@ -108,6 +149,8 @@ Cruft compare le commit du template utilisé à la génération (tracé dans `.c
 | **mypy** | mode strict, `ignore_missing_imports = true` |
 | **pytest** | doctests activés, coverage HTML + terminal |
 | **coverage** | seuil minimum 88%, rapport des lignes manquantes |
+| **invoke** | tâches d'automatisation dans `tasks/` |
+| **Sphinx + Furo** | documentation auto-générée depuis les docstrings |
 
 ---
 
