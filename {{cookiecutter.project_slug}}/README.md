@@ -15,7 +15,7 @@
 ## Installation
 
 ```bash
-git clone https://github.com//{{cookiecutter.project_slug}}.git
+git clone git@github.com:{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}.git
 cd {{cookiecutter.project_slug}}
 uv sync
 ```

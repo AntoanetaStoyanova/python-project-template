@@ -50,7 +50,7 @@ mon_projet/
 ├── src/mon_projet/
 │   ├── __init__.py
 │   ├── __main__.py
-│   ├── bin/                # scripts d'entrée CLI
+│   ├── bin/                # modules métier (fonctions)
 │   ├── config/             # constantes et paramètres
 │   ├── data/               # chargement / sauvegarde
 │   ├── log/                # configuration des logs

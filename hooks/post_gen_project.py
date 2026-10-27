@@ -10,6 +10,8 @@ from pathlib import Path
 
 PROJECT_SLUG = "{{cookiecutter.project_slug}}"
 PYTHON_VERSION = "{{cookiecutter.python_version}}"
+GITHUB_USERNAME = "{{cookiecutter.github_username}}"
+REMOTE_URL = f"git@github.com:{GITHUB_USERNAME}/{PROJECT_SLUG}.git"
 
 
 def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
@@ -57,19 +59,15 @@ def main() -> None:
 
     if answer != "o":
         print("\nPas de push automatique. Pour le faire manuellement plus tard :")
-        print(f"  git remote add origin https://github.com/<ton_username>/{PROJECT_SLUG}.git")
+        print(f"  git remote add origin {REMOTE_URL}")
         print("  git push -u origin develop")
         print("\nNote : .cruft.json est déjà présent. 'cruft update' fonctionnera")
         print("dès que le remote GitHub sera configuré.")
     else:
-        github_username = input("Ton GitHub username : ").strip()
-        remote_url = f"https://github.com/{github_username}/{PROJECT_SLUG}.git"
+        print("\nUtilisation de ta clé SSH GitHub (vérifier avec : ssh -T git@github.com).")
+        print(f"Remote : {REMOTE_URL}")
 
-        print(f"\nUtilisation des credentials Git déjà configurés sur ta machine.")
-        print(f"(token HTTPS via 'gh auth login' ou clé SSH)")
-        print(f"Remote : {remote_url}")
-
-        run(["git", "remote", "add", "origin", remote_url])
+        run(["git", "remote", "add", "origin", REMOTE_URL])
         result = run(["git", "push", "-u", "origin", "develop"], check=False)
 
         if result.returncode != 0:
@@ -85,7 +83,7 @@ def main() -> None:
             print(f"  git push -u origin develop")
         else:
             print(f"\nSucces ! Le projet '{PROJECT_SLUG}' est disponible sur GitHub.")
-            print(f"  {remote_url.replace('.git', '')}")
+            print(f"  https://github.com/{GITHUB_USERNAME}/{PROJECT_SLUG}")
 
     # 7. Récapitulatif final
     branch = subprocess.check_output(
