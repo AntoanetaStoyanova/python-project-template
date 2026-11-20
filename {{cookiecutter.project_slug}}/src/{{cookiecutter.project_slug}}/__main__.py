@@ -4,7 +4,8 @@ from {{cookiecutter.project_slug}}.log import setup_logging
 
 PROJECT_NAME = "{{cookiecutter.project_slug}}"
 
-# dans les autres module .py 
+
+# dans les autres module .py
 # import logging
 #  logger = logging.getLogger(__name__)
 def main() -> None:

@@ -31,15 +31,16 @@ Le template génère un projet avec les tâches de workflow de cartograph (sans 
 
 ## Étape 2 — Config, dépendances, CI et hook de génération
 
-- [ ] `cookiecutter.json` : `"python_version": "3.13"`.
-- [ ] `{{cookiecutter.project_slug}}/pyproject.toml` : ajouter `pre-commit>=4.7.0`, `okflint==0.5.1`, `commitizen>=4.19.3` au groupe `dev` ; ajouter `[tool.commitizen]` (cz_customize, repris de cartograph).
-- [ ] Créer `.pre-commit-config.yaml` (pre-commit-hooks, ruff-check, ruff-format, commitizen), `default_install_hook_types: [pre-commit, commit-msg]`, sans sqlfluff.
+- [x] `cookiecutter.json` : `"python_version": "3.13"`.
+- [x] `{{cookiecutter.project_slug}}/pyproject.toml` : ajouter `pre-commit>=4.7.0`, `okflint==0.5.1`, `commitizen>=4.19.3` au groupe `dev` ; ajouter `[tool.commitizen]` (cz_customize, repris de cartograph).
+- [x] Créer `.pre-commit-config.yaml` (pre-commit-hooks, ruff-check, ruff-format, commitizen), `default_install_hook_types: [pre-commit, commit-msg]`, sans sqlfluff.
 - [x] Créer `.clean` : `**/__pycache__/`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.coverage`, `coverage.json`, `htmlcov/`, `docs/_build/`, `src/*.egg-info/`.
-- [ ] Créer `okf-base.yaml` avec `name: {{cookiecutter.project_slug}}`, et `docs/specs/.gitkeep`, `docs/plans/.gitkeep`.
-- [ ] Créer `.github/workflows/ci.yml` : `uv sync` sans `--locked`, `uv run inv ci`, `${{ }}` entre `{% raw %}` ; actions épinglées comme dans cartograph.
-- [ ] Supprimer `.cruftignore` du template (jamais lu par cruft).
-- [ ] `hooks/post_gen_project.py` : créer `.ai-context/JOURNAL.md` depuis `~/.claude/workspace/JOURNAL.template.md` s'il existe, sinon l'en-tête du gabarit écrit en dur ; lancer `uv run pre-commit install` avant le commit initial.
-- [ ] Tests : générer un projet (`cruft create` local ou `cookiecutter` sur le dossier, hors du dépôt), puis vérifier `inv -l`, `inv ci`, `inv hooks`, `inv clean`, `inv okflint`, `inv release --dry-run`. Trancher CHANGELOG.md et le comportement d'okflint sans documents ; ajuster le template en conséquence.
+- [x] Créer `okf-base.yaml` avec `name: {{cookiecutter.project_slug}}`, et `docs/specs/.gitkeep`, `docs/plans/.gitkeep`.
+- [x] Créer `.github/workflows/ci.yml` : `uv sync` sans `--locked`, `uv run inv ci`, `${{ }}` entre `{% raw %}` ; actions épinglées comme dans cartograph.
+- [x] Supprimer `.cruftignore` du template (jamais lu par cruft).
+- [x] `hooks/post_gen_project.py` : créer `.ai-context/JOURNAL.md` avec l'en-tête du gabarit écrit en dur dans le hook (pas de dépendance à `~`) ; lancer `uv run pre-commit install` après le commit initial, qui ne passe pas les hooks.
+- [x] Tests : générer un projet (`cruft create` local ou `cookiecutter` sur le dossier, hors du dépôt), puis vérifier `inv -l`, `inv ci`, `inv hooks`, `inv clean`, `inv okflint`, `inv release --dry-run`. Trancher CHANGELOG.md et le comportement d'okflint sans documents ; ajuster le template en conséquence.
+- [x] Ajouts nécessaires à `inv ci` d'un projet généré : `tests/test_log.py` et `tests/test_main.py` (couverture 100 % ≥ 88 %), `[tool.setuptools.packages.find]` corrigé (`where = ["src"]`, le paquet n'était pas importable), `version_files` commitizen sur `__version__`, reformatage de `log/__init__.py`, `__main__.py` et `CONTRIBUTING.md` pour ruff.
 
 ## Étape 3 — Documentation du template
 
