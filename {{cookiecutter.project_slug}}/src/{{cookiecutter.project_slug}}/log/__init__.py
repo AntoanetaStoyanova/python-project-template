@@ -4,7 +4,9 @@ from datetime import datetime
 from pathlib import Path
 
 
-def setup_logging(project_name: str, log_dir: Path = Path("logs"), level: int = logging.INFO) -> logging.Logger:
+def setup_logging(
+    project_name: str, log_dir: Path = Path("logs"), level: int = logging.INFO
+) -> logging.Logger:
     log_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

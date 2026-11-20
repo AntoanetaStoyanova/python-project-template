@@ -12,6 +12,23 @@ PROJECT_SLUG = "{{cookiecutter.project_slug}}"
 PYTHON_VERSION = "{{cookiecutter.python_version}}"
 GITHUB_USERNAME = "{{cookiecutter.github_username}}"
 REMOTE_URL = f"git@github.com:{GITHUB_USERNAME}/{PROJECT_SLUG}.git"
+JOURNAL_HEADER = """# Journal — {{cookiecutter.project_name}}
+
+> **Usage — Claude Code** : ce fichier trace l'avancement du projet session par session —
+> ce qui a été fait et ce qu'il reste à faire. Contrairement à `CURRENT.md` (état du code
+> au moment d'une review), ce journal suit les décisions, les documents créés et les étapes
+> franchies. Ajoute une entrée en haut (sous ce bloc) à chaque session de travail
+> significative. Ne supprime pas les entrées précédentes.
+>
+> Format d'une entrée :
+>
+> ## [YYYY-MM-DD] — <titre court de la session>
+> ### Fait
+> ### Reste à faire
+> ### Références
+
+---
+"""
 
 
 def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
@@ -36,6 +53,8 @@ def main() -> None:
         current_md.read_text().replace("__INIT_DATE__", date.today().isoformat())
     )
 
+    Path(".ai-context/JOURNAL.md").write_text(JOURNAL_HEADER, encoding="utf-8")
+
     # 2. Initialiser git et créer la branche develop
     run(["git", "init"])
     run(["git", "checkout", "-b", "develop"])
@@ -54,7 +73,10 @@ def main() -> None:
     run(["git", "add", "."])
     run(["git", "commit", "-m", "chore: initial project structure from cruft template"])
 
-    # 6. Demander si on pousse sur GitHub
+    # 6. Installer les hooks pre-commit (après le commit initial, qui ne les passe pas)
+    run(["uv", "run", "pre-commit", "install"])
+
+    # 7. Demander si on pousse sur GitHub
     answer = input("\nVeux-tu pousser le projet sur GitHub ? [o/n] ").strip().lower()
 
     if answer != "o":
@@ -85,7 +107,7 @@ def main() -> None:
             print(f"\nSucces ! Le projet '{PROJECT_SLUG}' est disponible sur GitHub.")
             print(f"  https://github.com/{GITHUB_USERNAME}/{PROJECT_SLUG}")
 
-    # 7. Récapitulatif final
+    # 8. Récapitulatif final
     branch = subprocess.check_output(
         ["git", "branch", "--show-current"], text=True
     ).strip()
