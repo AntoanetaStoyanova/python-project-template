@@ -56,20 +56,28 @@ Le template génère un projet avec les tâches de workflow de cartograph (sans 
 
 ## Étape 5 — Mise à jour de veille
 
-- [ ] Dans veille, avant `cruft update` : créer `tasks/projet.py` avec `run` et `dry_run` (déplacés depuis `tasks/__init__.py`) et ajouter `"skip": ["tasks/projet.py"]` à `.cruft.json`.
-- [ ] `cruft update` ; résoudre les conflits de `tasks/__init__.py` (prendre la version du template), `pyproject.toml` (garder les dépendances d'exécution `anthropic`, `beartype`, `feedparser`, `pyyaml`, ajouter celles du template) et `.cruftignore` (supprimé).
-- [ ] `uv sync` ; `uv run inv -l` : `run` et `dry_run` présents.
-- [ ] Créer `docs/specs` et `docs/plans` s'ils n'ont pas d'équivalent ; vérifier que `okf-base.yaml` accepte les specs et plans existants (`veille-quotidienne.md`, frontmatter).
-- [ ] Tests : `uv run inv ci` passe.
+- [x] Dans veille, avant `cruft update` : créer `tasks/projet.py` avec `run` et `dry_run` (déplacés depuis `tasks/__init__.py`) et ajouter `"skip": ["tasks/projet.py"]` à `.cruft.json`.
+- [x] `cruft update` (lancé par toi, commité avec des marqueurs de conflit non résolus) ; résoudre les conflits de `tasks/__init__.py` (prendre la version du template), `pyproject.toml` (garder les dépendances d'exécution `anthropic`, `beartype`, `feedparser`, `pyyaml`, ajouter celles du template) et `.cruftignore` (supprimé).
+- [x] `uv sync` ; `uv run inv -l` : `run` et `dry_run` présents.
+- [x] Créer `docs/specs` et `docs/plans` s'ils n'ont pas d'équivalent ; vérifier que `okf-base.yaml` accepte les specs et plans existants (`veille-quotidienne.md`, frontmatter).
+- [x] Tests : `uv run inv ci` passe.
 - [ ] Commits sur `develop` de veille ; pas de push sans demande.
 
 ## Étape 6 — Vérifications dans veille
 
-- [ ] `inv hooks` installe pre-commit et commit-msg.
-- [ ] `inv clean` supprime les fichiers générés sans toucher `.env`, `.venv`, `docs/`.
-- [ ] `inv okflint` passe.
+- [x] `inv hooks` installe pre-commit et commit-msg.
+- [x] `inv clean` supprime les fichiers générés sans toucher `.env`, `.venv`, `docs/`.
+- [x] `inv okflint` passe.
 - [ ] `inv release --dry-run` passe sur `develop` (`cz bump --dry-run`).
 - [ ] Noter dans le journal de veille le tag cruft appliqué.
+
+
+## Étape 7 — Premier tag git (blocage de `inv release`)
+
+- [x] `tasks/__init__.py` : `_require_tag` (arrêt clair sans tag) appelé par `release` ; `in_stream=False` sur les appels `cz` (`_bump`, `_next_version`) pour qu'une question de `cz` échoue au lieu de bloquer.
+- [x] `hooks/post_gen_project.py` : tag annoté `v<version>` posé sur le commit initial.
+- [x] Tests : `test_release_refuses_missing_tag` (avec et sans `--dry-run`).
+- [x] Générer un projet de test : `git tag` contient `v0.1.0`, `inv release --dry-run` ne bloque pas, `inv ci` passe ; sans tag, `inv release` s'arrête avec le message d'erreur.
 
 ## Critères de fin
 

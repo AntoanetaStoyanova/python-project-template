@@ -199,6 +199,7 @@ def release(c: Context, dry_run: bool = False) -> None:
     if branch != "develop":
         raise Exit(f"inv release se lance sur develop, pas sur {branch}.")
     _require_clean(c)
+    _require_tag(c)
     if dry_run:
         _bump(c, "uv run cz bump --dry-run --yes")
         return
@@ -332,6 +333,15 @@ def _require_clean(c: Context) -> None:
         raise Exit("Arbre de travail non propre : commiter ou ranger d'abord.")
 
 
+def _require_tag(c: Context) -> None:
+    """Arrête la tâche sans tag git : cz poserait une question que personne ne voit."""
+    if not c.run("git describe --tags --abbrev=0", hide=True, warn=True).ok:
+        raise Exit(
+            "Aucun tag git. Créer le premier : "
+            "git tag -a v<version> -m v<version> $(git rev-list --max-parents=0 HEAD)"
+        )
+
+
 def _open_release_pr(c: Context) -> None:
     """Ouvre la PR develop → main de la version publiée, ou affiche celle qui existe."""
     tag = "v" + c.run("uv version --short", hide=True).stdout.strip()
@@ -371,7 +381,7 @@ def _changelog_section(text: str, tag: str) -> str:
 
 def _bump(c: Context, command: str) -> None:
     """Lance cz bump ; codes 3 et 21 : aucun commit qui change la version."""
-    result = c.run(command, warn=True)
+    result = c.run(command, warn=True, in_stream=False)
     if result.exited in (3, 21):
         raise Exit("Rien à publier : aucun feat, fix, refactor ou perf depuis le tag.")
     if result.exited:
@@ -380,7 +390,7 @@ def _bump(c: Context, command: str) -> None:
 
 def _next_version(c: Context) -> str:
     """Version que cz bump va publier ; arrête la tâche s'il n'y a rien à publier."""
-    result = c.run("uv run cz bump --get-next", hide=True, warn=True)
+    result = c.run("uv run cz bump --get-next", hide=True, warn=True, in_stream=False)
     if result.exited in (3, 21):
         raise Exit("Rien à publier : aucun feat, fix, refactor ou perf depuis le tag.")
     if result.exited:

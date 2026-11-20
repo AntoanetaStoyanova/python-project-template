@@ -73,6 +73,10 @@ def main() -> None:
     run(["git", "add", "."])
     run(["git", "commit", "-m", "chore: initial project structure from cruft template"])
 
+    # Premier tag : sans lui, `cz bump` pose une question interactive et inv release bloque.
+    version = subprocess.check_output(["uv", "version", "--short"], text=True).strip()
+    run(["git", "tag", "-a", f"v{version}", "-m", f"v{version}"])
+
     # 6. Installer les hooks pre-commit (après le commit initial, qui ne les passe pas)
     run(["uv", "run", "pre-commit", "install"])
 

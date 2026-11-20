@@ -14,6 +14,7 @@ CI = [
 DOCS = "uv run sphinx-build -b html docs docs/_build/html"
 VERSION = "uv version --short"
 GET_NEXT = "uv run cz bump --get-next"
+DESCRIBE = "git describe --tags --abbrev=0"
 GIT_ADD = "git add .ai-context/JOURNAL.md .ai-context/LOG.md"
 GIT_COMMIT = "git commit -m 'chore(journal): archive avant v0.4.0'"
 PR_LIST = (
@@ -61,7 +62,11 @@ def _changelog(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _context(
-    branch: str = "develop", status: str = "", bump_exit: int = 0, pr_url: str = ""
+    branch: str = "develop",
+    status: str = "",
+    bump_exit: int = 0,
+    pr_url: str = "",
+    tag_exit: int = 0,
 ) -> MockContext:
     commands = [
         "git pull --ff-only",
@@ -74,6 +79,7 @@ def _context(
     results = {cmd: Result() for cmd in commands}
     results["git branch --show-current"] = Result(f"{branch}\n")
     results["git status --porcelain"] = Result(status)
+    results[DESCRIBE] = Result("v0.3.0\n", exited=tag_exit)
     results[GET_NEXT] = Result("0.4.0\n", exited=bump_exit)
     results["uv run cz bump --yes"] = Result(exited=bump_exit)
     results["uv run cz bump --dry-run --yes"] = Result(exited=bump_exit)
@@ -96,6 +102,7 @@ def test_release_runs_checks_bump_docs_push_then_opens_pr() -> None:
     assert commands[:-2] == [
         "git branch --show-current",
         "git status --porcelain",
+        DESCRIBE,
         "git pull --ff-only",
         *CI,
         GET_NEXT,
@@ -127,6 +134,14 @@ def test_release_refuses_dirty_tree() -> None:
     with pytest.raises(Exit, match="propre"):
         release(c)
     assert "git pull --ff-only" not in _commands(c)
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_release_refuses_missing_tag(dry_run: bool) -> None:
+    c = _context(tag_exit=128)
+    with pytest.raises(Exit, match="Aucun tag"):
+        release(c, dry_run=dry_run)
+    assert not any("cz bump" in cmd for cmd in _commands(c))
 
 
 def test_release_dry_run_changes_nothing() -> None:
