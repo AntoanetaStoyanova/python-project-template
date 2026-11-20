@@ -44,9 +44,9 @@ Le template génère un projet avec les tâches de workflow de cartograph (sans 
 
 ## Étape 3 — Documentation du template
 
-- [ ] `CONTRIBUTING.md` : section Contrôles (`inv ci`, `inv lint` via pre-commit) ; section Git (branches `feature/*`, `inv finish`, `inv release`, `inv clean`, `inv delete-branch`, `inv clean-branches`, `inv hooks`, `inv okflint`) ; ajouter `perf:` au tableau des commits ; documenter `tasks/projet.py` pour les tâches du projet ; prérequis `gh`.
-- [ ] `README.md` du template : prérequis `gh`, Python 3.13 seul, nouvelles tâches, structure (`.clean`, `okf-base.yaml`, `.pre-commit-config.yaml`, `.github/`, `tasks/projet.py`), et la règle « après `cruft create` ou avant la première mise à jour, ajouter `tasks/projet.py` à `skip` dans `.cruft.json` ».
-- [ ] Tests : `inv okflint` et markdown de la doc passent sur le projet généré.
+- [x] `CONTRIBUTING.md` : section Contrôles (`inv ci`, `inv lint` via pre-commit) ; section Git (branches `feature/*`, `inv finish`, `inv release`, `inv clean`, `inv delete-branch`, `inv clean-branches`, `inv hooks`, `inv okflint`) ; ajouter `perf:` au tableau des commits ; documenter `tasks/projet.py` pour les tâches du projet ; prérequis `gh`.
+- [x] `README.md` du template : prérequis `gh`, Python 3.13 seul, nouvelles tâches, structure (`.clean`, `okf-base.yaml`, `.pre-commit-config.yaml`, `.github/`, `tasks/projet.py`), et la règle « après `cruft create` ou avant la première mise à jour, ajouter `tasks/projet.py` à `skip` dans `.cruft.json` ».
+- [x] Tests : `inv okflint` et markdown de la doc passent sur le projet généré.
 
 ## Étape 4 — Commit et push du template
 

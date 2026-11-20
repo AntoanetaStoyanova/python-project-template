@@ -12,6 +12,7 @@ Chaque projet généré inclut : environnement uv, linting Ruff, typage mypy str
 |-------|------|-------------|
 | [**uv**](https://docs.astral.sh/uv/) | Gestion de l'environnement Python et des dépendances | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | [**cruft**](https://cruft.github.io/cruft/) | Génération de projet et mises à jour depuis le template | `uv tool install cruft` |
+| [**gh**](https://cli.github.com/) | `inv finish`, `inv release`, `inv delete-branch`, `inv clean-branches` | `gh auth login` après installation |
 
 ---
 
@@ -29,15 +30,16 @@ Cruft pose ces questions :
 | Slug (auto-calculé) | `project_slug` | `my_data_pipeline` |
 | Auteur | `author` | `Antoaneta Stoyanova` |
 | Description | `description` | `Pipeline d'ingestion de données` |
-| Version Python | `python_version` | `3.13` (choix dans liste) |
+| Version Python | `python_version` | `3.13` (seule version, `inv clean` exige `PurePosixPath.full_match`) |
 
 Le hook post-génération s'exécute automatiquement et :
 
 1. Initialise git sur la branche `develop`
 2. Épingle la version Python choisie avec `uv python pin`
 3. Crée le virtualenv et installe les dépendances avec `uv sync`
-4. Crée le commit initial
-5. Propose de pousser le projet sur GitHub
+4. Crée `.ai-context/JOURNAL.md` et le commit initial
+5. Installe les hooks pre-commit et commit-msg
+6. Propose de pousser le projet sur GitHub
 
 ---
 
@@ -46,7 +48,10 @@ Le hook post-génération s'exécute automatiquement et :
 ```
 mon_projet/
 ├── .ai-context/
-│   └── CURRENT.md          # suivi d'état pour Claude Code (review datées)
+│   ├── CURRENT.md          # suivi d'état pour Claude Code (review datées)
+│   └── JOURNAL.md          # avancement session par session (LOG.md créé par inv release)
+├── .github/workflows/ci.yml # inv ci sur chaque pull request
+├── docs/                   # Sphinx ; specs/ et plans/ vérifiés par okflint
 ├── src/mon_projet/
 │   ├── __init__.py
 │   ├── __main__.py
@@ -55,9 +60,15 @@ mon_projet/
 │   ├── data/               # chargement / sauvegarde
 │   ├── log/                # configuration des logs
 │   └── notebook/           # utilitaires Jupyter
+├── tasks/
+│   ├── __init__.py         # tâches du template (écrasées par cruft update)
+│   └── projet.py           # tâches propres au projet (voir skip ci-dessous)
 ├── tests/
+├── .clean                  # fichiers générés supprimés par inv clean
+├── .pre-commit-config.yaml # hooks : fichiers, ruff, commitizen
+├── okf-base.yaml           # règles okflint pour docs/
 ├── CONTRIBUTING.md         # standards de développement Python
-├── pyproject.toml          # ruff, mypy, pytest, coverage configurés
+├── pyproject.toml          # ruff, mypy, pytest, coverage, commitizen configurés
 └── .gitignore
 ```
 
@@ -112,6 +123,36 @@ Chaque projet généré inclut un dossier `tasks/` avec des commandes d'automati
 
 | Commande | Description |
 |----------|-------------|
+| `inv lint` | `pre-commit run --all-files` (ruff, fichiers) |
+| `inv hooks` | Installe les hooks pre-commit et commit-msg |
+| `inv fmt` | Formate le code avec Ruff |
+| `inv typecheck` | Vérifie les types avec mypy |
+| `inv check` | Lint + typecheck en séquence |
+| `inv test` | Lance pytest avec coverage |
+| `inv ci` | Suite complète : lint, typecheck, tests (sans clean) |
+| `inv okflint` | Vérifie l'en-tête et les liens des specs et plans |
+| `inv docs` | Génère la documentation Sphinx dans `docs/_build/html/` |
+| `inv clean` | Supprime les fichiers générés listés dans `.clean` |
+| `inv finish` | Sur `feature/*` : ci, okflint, push, PR vers `develop`, clean |
+| `inv release` | Sur `develop` : cz bump, changelog, tag, push, PR vers `main`, archivage du journal |
+| `inv delete-branch <nom>` | Supprime une branche locale et distante (PR fusionnée, ou `--force`) |
+| `inv clean-branches` | Supprime, après confirmation, les branches dont la PR est fusionnée |
+
+`finish`, `release`, `delete-branch` et `clean-branches` exigent la CLI `gh`.
+
+### Tâches propres au projet
+
+Les ajouter dans `tasks/projet.py`. Pour que `cruft update` ne l'écrase pas, ajouter dans `.cruft.json` du projet : `"skip": ["tasks/projet.py"]`.
+
+### Exemples
+
+```bash
+inv ci          # avant un push
+inv finish      # PR vers develop
+inv release --dry-run
+```
+
+----------|-------------|
 | `inv lint` | Vérifie le code avec Ruff (lint) |
 | `inv fmt` | Formate le code avec Ruff |
 | `inv typecheck` | Vérifie les types avec mypy |
@@ -149,7 +190,11 @@ inv push-develop
 | **mypy** | mode strict, `ignore_missing_imports = true` |
 | **pytest** | doctests activés, coverage HTML + terminal |
 | **coverage** | seuil minimum 88%, rapport des lignes manquantes |
+| **pre-commit** | fichiers, ruff, format des commits (commitizen) |
+| **commitizen** | changelog et version depuis les Conventional Commits |
+| **okflint** | en-tête et liens des specs et plans de `docs/` |
 | **invoke** | tâches d'automatisation dans `tasks/` |
+| **GitHub Actions** | `inv ci` sur chaque pull request |
 | **Sphinx + Furo** | documentation auto-générée depuis les docstrings |
 
 ---
